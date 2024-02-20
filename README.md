@@ -1,12 +1,12 @@
 # Right Wing Extremism Dashboard
 
-![banner](dashboard1.png)
+![banner](screenshots/dashboard1.png)
 
-![banner](dashboard2.png)
+![banner](screenshots/dashboard2.png)
 
-![banner](dashboard3.png)
+![banner](screenshots/dashboard3.png)
 
-![banner](dashboard4.png)
+![banner](screenshots/dashboard4.png)
 
 
 more to follow ...
