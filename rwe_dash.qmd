@@ -87,10 +87,10 @@ tags$a(href = "https://www.wzb.eu",
 
 ```{r}
 mainPanel(
-  h3("Politisch motivierte Kriminalität 2000-2020"),
-  h5("Die Daten wurden aus den Verfassungsschutzberichten 2000-2020 entnommen.
+  h3("Politisch motivierte Kriminalität 2000-2021"),
+  h5("Die Daten wurden aus den Verfassungsschutzberichten 2000 bis 2021 entnommen.
   Nicht zu jeder Kategorie und zu jedem Jahr liegen Daten vor, aus diesem Grund können die Graphen
-  teilweise lückenhaft sein."),
+  teilweise lückenhaft sein. Bitte beachten Sie auch die Veränderung der Y-Achsenskalierung"),
   plotOutput("plot_pmk", hover=hoverOpts("plot_hover", delay = 50, delayType = "throttle")),
   textOutput('hover_info'))
 ```
@@ -160,7 +160,7 @@ output$hover_info <- renderText({
 ```{r}
 mainPanel(
   h3("Rechtsextreme Straftaten 2002 -2022"),
-  h5("Hier sehen Sie die monatliche Anzahl rechtsextremistischer Straftaten im Zeitraum von 2002 bis 2022.
+  h5("Hier sehen Sie die monatliche Anzahl rechtsextremistischer Straftaten im Zeitraum von 2002 bis Ende 2022.
      Datengrundlage sind die 'kleinen Anfragen' an den Bundestag durch die Fraktion DIE LINKE."),
   plotOutput("plot_rs", hover=hoverOpts("plot_hover", delay = 50, delayType = "throttle")),
   textOutput('hover_info2'))
@@ -233,7 +233,7 @@ output$hover_info2 <- renderText({
 mainPanel(
   leafletOutput("interactivePlot"),
   h3("Rechtsextreme Demonstrationen nach Landkreisen 2005-2022"),
-  h5(HTML("Hier sehen Sie die Anzahl rechtsextremer Demonstrationen und ihre Teilnehmerzahl aufgeteilt nach Landkreisen im Zeitraum 2005-2022. 
+  h5(HTML("Hier sehen Sie die Anzahl rechtsextremer Demonstrationen und ihre Teilnehmerzahl aufgeteilt nach Landkreisen im Zeitraum 2005 bis Ende 2022. 
   Datengrundlage sind 'kleine Anfragen' an den Bundestag durch die Fraktion DIE LINKE. <br> 
   <a href='https://data.gesis.org/sharing/#!Detail/10.7802/2256' target='_blank'> Quelle: Kanol, E.; Knoesel, J. (2021): Right-Wing Extremist Mobilization in Germany. Version 1.0.0. WZB Berlin Social Science Center. Dataset.</a>"))
 )
