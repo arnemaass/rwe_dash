@@ -19,11 +19,11 @@ server: shiny
 #| context: setup
 
 # TO DO:
-# - Deutsch/Englisch-Version: https://marioangst.com/de/blog/posts/multi-language-quarto/
-#   profile mit seperaten yaml headern anlegen
+# - German/Englisch-Version: https://marioangst.com/de/blog/posts/multi-language-quarto/
+#   profiles with individual yaml hearders
 
 
-rm(list = ls())
+# rm(list = ls())
 
 # locally
 # setwd("C:/Users/user/OneDrive/Desktop/WZB/PMK/2024/quarto_dash")
@@ -44,25 +44,10 @@ library(rsconnect)
 library(shiny)
 
 
-pmk_zs <- read_parquet("data/PMK_neu.parquet")
-rwm<-read_rds("data/data_kreise.rds")
+pmk_zs <- read_parquet("data/PMK_shiny.parquet")
+rwm<- readRDS("data/data_kreise.rds")
+rwm1<- readRDS("data/rwm_shiny.rds")
 rs <- read_parquet("data/klanfrright23.parquet")
-
-
-# Create a complete geometry grid for all years
-rwm1 <- rwm %>%
-  group_by(year, geometry) %>%
-  summarise(participants=sum(participants, na.rm = TRUE)+1,
-            demo_count= n()+1) %>%
-  ungroup()
-
-# get the cross product of years and geometry, add kreise
-YG_grid <- crossing(year = unique(rwm$year), geometry = rwm$geometry) %>% left_join(distinct(select(rwm,geometry,kreis)), by = "geometry")
-
-
-rwm1 <- left_join(YG_grid, rwm1, by = c("year", "geometry"))%>%
-  replace_na(list(participants = 1, demo_count = 1)) %>%
-  st_as_sf()
 
 ####
 
@@ -85,10 +70,9 @@ mainPanel(
   h5(HTML(
   "Dieses Dashboard visualisiert drei selbsterstellte Datensätze zu rechtem Extremismus in Deutschland.<br>
   Oben können Sie zwischen den Visualisierungen wechseln und die Daten nach Ihren Wünschen filtern. <br>  <br>
-  Die erste Visualisierung skizziert die Mobilisierung von Demonstrationen, welche vom Verfassungsschutz als gesichert rechtsextremistisch eingestuft wurden.<br>
   Politisch motivierte Kriminalität zeigt die jährliche Entwicklung verschiedener ideologisch motivierter Straftaten auf Grundlage von Verfassungsschutzberichten.<br>
-  Zuletzt wird eine monatliche Zeitreihe für rechtsextremistische Straftaten nach Bundesländern vorgestellt.<br>
-  "),
+  Die zweite Visualisierung ist eine monatliche Zeitreihe für rechtsextremistische Straftaten nach Bundesländern. <br>
+  Zuletzt wird die Mobilisierung von Demonstrationen, welche vom Verfassungsschutz als gesichert rechtsextremistisch eingestuft wurden, skizziert. <br>  <br>  <br>"),
   style = "text-align: center;"),
   tags$br(),
 tags$a(href = "https://www.wzb.eu",
@@ -96,98 +80,6 @@ tags$a(href = "https://www.wzb.eu",
            style = "display: block; margin-left: auto; margin-right: auto; max-width: 100%; height: auto;"),
        style = "position: absolute; bottom: 10px; width: 90%; text-align: center;")
 )
-
-```
-
-# Rechte Demos
-
-```{r}
-
-mainPanel(
-  leafletOutput("interactivePlot"),
-  h3("Rechtsextreme Demonstrationen nach Landkreisen 2005-2022"),
-  h5(HTML("Hier sehen Sie die Anzahl rechtsextremer Demonstrationen und ihre Teilnehmerzahl aufgeteilt nach Landkreisen im Zeitraum 2005-2022. 
-  Datengrundlage sind 'kleine Anfragen' an den Bundestag durch die Fraktion DIE LINKE. Der Datensatz ist <a href='https://data.gesis.org/sharing/#!Detail/10.7802/2256' target='_blank'>hier</a> abrufbar.<br> 
-  Quelle: Kanol, E.; Knoesel, J. (2021): Right-Wing Extremist Mobilization in Germany. Version 1.0.0. WZB Berlin Social Science Center. Dataset."))
-)
-
-```
-
-## {.sidebar}
-
-
-```{r}
-
-sliderInput("selectedYear", "Hier können Sie einzelne Jahre auswählen (L-R Pfeiltasten zum Schieben):",
-            min = min(rwm$year, na.rm = TRUE),
-            max = max(rwm$year, na.rm = TRUE),
-            value = min(rwm$year, na.rm = TRUE), # Standardmäßig das erste Jahr auswählen
-            step = 1, # Ermöglicht die Auswahl von einzelnen Jahren
-            sep = "",
-            ticks = FALSE)
-
-radioButtons("fillVariable", "Wählen Sie zwischen der jährlich aggregierten:",
-                   choices = c("Anzahl der Demonstrationen" = "demo_count",
-                               "Anzahl der TeilnehmerInnen" = "participants"))
-
-```
-
-
-```{r}
-#| context: server
-
-
-output$interactivePlot <- renderLeaflet({
-
-    rwm1_filtered <- filter(rwm1, year == input$selectedYear)
-
-    fill_variable <- if(input$fillVariable == "demo_count")  {
-      "demo_count"
-      } else {
-        "participants"
-        }
-
-    # Determine the range of log-transformed values for coloring
-    limits <- c(0, max(log10(rwm1[[fill_variable]]+1), na.rm = TRUE))
-
-    color_pal <- colorNumeric(palette = viridis(256, option = "B"), domain = limits)
-
-
-    # Create the Leaflet map
-    leaflet(rwm1_filtered) %>%
-      addTiles() %>%
-      addProviderTiles(providers$CartoDB.Positron) %>%
-      addPolygons(
-        fillColor = ~color_pal(log10(rwm1_filtered[[fill_variable]])), # Log10 transfo for better scaling
-        weight = 1,
-        opacity = 1,
-        color = "gray",
-        dashArray = "2",
-        fillOpacity = 0.7,
-        smoothFactor = 0.5,
-        label = ~sprintf("%s | Anzahl: %s",
-                     rwm1_filtered$kreis,
-                     rwm1_filtered[[fill_variable]]-1),
-        highlightOptions = highlightOptions(
-          weight = 3,
-          color = "#666",
-          dashArray = "",
-          fillOpacity = 0.7,
-          bringToFront = TRUE
-          )
-        ) %>%
-      setView(lng = 10.5, lat = 51.2, zoom = 6) %>%
-      addLegend(
-        pal = color_pal,
-        values = ~log10(rwm1[[fill_variable]] +1),
-        opacity = 0.7,
-        title = "Anzahl:",
-        position = "bottomright",
-        labFormat = labelFormat(transform = function(x) round(10^x)) # Manually adjust label format to show original scale
-        )
-  })
-
-
 
 ```
 
@@ -263,10 +155,7 @@ output$hover_info <- renderText({
 
 ```
 
-
-
 # Rechte Straftaten 
-
 
 ```{r}
 mainPanel(
@@ -276,7 +165,6 @@ mainPanel(
   plotOutput("plot_rs", hover=hoverOpts("plot_hover", delay = 50, delayType = "throttle")),
   textOutput('hover_info2'))
 ```
-
 
 ## {.sidebar}
 
@@ -338,7 +226,96 @@ output$hover_info2 <- renderText({
 
 ```
 
+# Rechte Demos
 
+```{r}
+
+mainPanel(
+  leafletOutput("interactivePlot"),
+  h3("Rechtsextreme Demonstrationen nach Landkreisen 2005-2022"),
+  h5(HTML("Hier sehen Sie die Anzahl rechtsextremer Demonstrationen und ihre Teilnehmerzahl aufgeteilt nach Landkreisen im Zeitraum 2005-2022. 
+  Datengrundlage sind 'kleine Anfragen' an den Bundestag durch die Fraktion DIE LINKE. <br> 
+  <a href='https://data.gesis.org/sharing/#!Detail/10.7802/2256' target='_blank'> Quelle: Kanol, E.; Knoesel, J. (2021): Right-Wing Extremist Mobilization in Germany. Version 1.0.0. WZB Berlin Social Science Center. Dataset.</a>"))
+)
+
+```
+
+## {.sidebar}
+
+```{r}
+
+sliderInput("selectedYear", "Hier können Sie einzelne Jahre auswählen (L-R Pfeiltasten zum Schieben):",
+            min = min(rwm$year, na.rm = TRUE),
+            max = max(rwm$year, na.rm = TRUE),
+            value = min(rwm$year, na.rm = TRUE), # Standardmäßig das erste Jahr auswählen
+            step = 1, # Ermöglicht die Auswahl von einzelnen Jahren
+            sep = "",
+            ticks = FALSE)
+
+radioButtons("fillVariable", "Wählen Sie zwischen der jährlich aggregierten:",
+                   choices = c("Anzahl der Demonstrationen" = "demo_count",
+                               "Anzahl der TeilnehmerInnen" = "participants"))
+
+```
+
+
+```{r}
+#| context: server
+
+
+output$interactivePlot <- renderLeaflet({
+
+    rwm1_filtered <- filter(rwm1, year == input$selectedYear)
+
+    fill_variable <- if(input$fillVariable == "demo_count")  {
+      "demo_count"
+      } else {
+        "participants"
+        }
+
+    # Determine the range of log-transformed values for coloring
+    limits <- c(0, max(log10(rwm1[[fill_variable]]+1), na.rm = TRUE))
+
+    color_pal <- colorNumeric(palette = viridis(256, option = "B"), domain = limits)
+
+
+    # Create the Leaflet map
+    leaflet(rwm1_filtered) %>%
+      addTiles() %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        fillColor = ~color_pal(log10(rwm1_filtered[[fill_variable]])), # Log10 transfo for better scaling
+        weight = 1,
+        opacity = 1,
+        color = "gray",
+        dashArray = "2",
+        fillOpacity = 0.7,
+        smoothFactor = 0.5,
+        label = ~sprintf("%s | Anzahl: %s",
+                     rwm1_filtered$kreis,
+                     rwm1_filtered[[fill_variable]]-1),
+        highlightOptions = highlightOptions(
+          weight = 3,
+          color = "#666",
+          dashArray = "",
+          fillOpacity = 0.7,
+          bringToFront = TRUE
+          )
+        ) %>%
+      setView(lng = 10.5, lat = 51.2, zoom = 6) %>%
+      addLegend(
+        pal = color_pal,
+        values = ~log10(rwm1[[fill_variable]] +1),
+        opacity = 0.7,
+        title = "Anzahl:",
+        position = "bottomright",
+        labFormat = labelFormat(transform = function(x) round(10^x)) # Manually adjust label format to show original scale
+        )
+  })
+
+
+
+```
 
 
 
