@@ -6,7 +6,7 @@ setwd("C:/Users/user/OneDrive/Desktop/WZB/PMK/2024/quarto_dash")
 library(tidyverse)
 library(sf)
 
-rwm<- readRDS("data/data_kreise.rds") # already 
+rwm<- readRDS("data/data_kreise.rds") # already merged with district shapefiles
 
 
 # Create a complete geometry grid for all years

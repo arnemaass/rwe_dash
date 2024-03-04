@@ -51,7 +51,7 @@ rs <- read_parquet("data/klanfrright23.parquet")
 
 ####
 
-rs$land <- as.factor(rs$land)
+rs$state <- as.factor(rs$state)
 
 ```
 
@@ -90,7 +90,7 @@ mainPanel(
   h3("Politisch motivierte Kriminalität 2000-2021"),
   h5("Die Daten wurden aus den Verfassungsschutzberichten 2000 bis 2021 entnommen.
   Nicht zu jeder Kategorie und zu jedem Jahr liegen Daten vor, aus diesem Grund können die Graphen
-  teilweise lückenhaft sein. Bitte beachten Sie auch die Veränderung der Y-Achsenskalierung"),
+  teilweise lückenhaft sein. Bitte beachten Sie auch die Veränderung der Y-Achsenskalierung."),
   plotOutput("plot_pmk", hover=hoverOpts("plot_hover", delay = 50, delayType = "throttle")),
   textOutput('hover_info'))
 ```
@@ -172,8 +172,8 @@ mainPanel(
 
 selectInput("tat", label= "Wählen Sie die Art der Straftat",
             choices = c("Insgesamt"= "total",
-                        "Gewalttaten"= "gewalt",
-                        "Straftaten"= "sonst"),
+                        "Gewalttaten"= "violent",
+                        "Straftaten"= "other"),
             selected = "Insgesamt")
 
 sliderInput("time2", "Hier können Sie den zeitlichen Ramen festlegen:",
@@ -183,8 +183,25 @@ sliderInput("time2", "Hier können Sie den zeitlichen Ramen festlegen:",
 
 
 checkboxGroupInput("BL", label = "Wählen Sie ein Bundesland",
-                   choices= levels(rs$land),
-                   selected = levels(rs$land))
+                   choices= list(
+                       "Baden-Württemberg"= "Baden-Wuerttemberg",
+                       "Bayern"= "Bavaria",
+                       "Berlin"= "Berlin",
+                       "Brandenburg"= "Brandenburg",
+                       "Bremen"= "Bremen",
+                       "Hamburg"= "Hamburg",
+                       "Hessen"= "Hesse",
+                       "Mecklenburg-Vorpommern" = "Mecklenburg-W.P.",
+                       "Niedersachsen"= "Lower Saxony",
+                       "Nordrhein-Westfalen"= "North Rhine-Westphalia",
+                       "Rheinland-Pfalz"= "Rhineland-Palatinate",
+                       "Saarland"= "Saarland",
+                       "Sachsen"= "Saxony",
+                       "Sachsen-Anhalt"= "Saxony-Anhalt",
+                       "Schleswig-Holstein"= "Schleswig-Holstein",
+                       "Thüringen"= "Thuringia"
+                   ),
+                   selected = levels(rs$state))
 
 
 ```
@@ -196,17 +213,18 @@ checkboxGroupInput("BL", label = "Wählen Sie ein Bundesland",
 output$plot_rs <- renderPlot({
   
   custom_colors <- c(
-  "Baden-Württemberg" = "deeppink", "Bayern" = "forestgreen",
+  "Baden-Wuerttemberg" = "deeppink", "Bavaria" = "forestgreen",
   "Berlin" = "gold", "Brandenburg" = "cornflowerblue",
   "Bremen" = "chocolate", "Hamburg" = "darkorchid4",
-  "Hessen" = "cyan1", "Mecklenburg-Vorpommern" = "gray0",
-  "Niedersachsen" = "#bcf60c", "Nordrhein-Westfalen" = "burlywood4",
-  "Rheinland-Pfalz" = "darkcyan", "Saarland" = "plum1",
-  "Sachsen" = "blue4", "Sachsen-Anhalt" = "#fffac9",
-  "Schleswig-Holstein" = "firebrick1", "Thüringen" = "#aaffc9"
+  "Hesse" = "cyan1", "Mecklenburg-W.P." = "gray0",
+  "Lower Saxony" = "#bcf60c", "North Rhine-Westphalia" = "burlywood4",
+  "Rhineland-Palatinate" = "darkcyan", "Saarland" = "plum1",
+  "Saxony" = "blue4", "Saxony-Anhalt" = "#fffac9",
+  "Schleswig-Holstein" = "firebrick1", "Thuringia" = "#aaffc9"
 )
+
   
-  ggplot(subset(rs, land %in% input$BL), aes(x=date, color= land))+
+  ggplot(subset(rs, state %in% input$BL), aes(x=date, color= state))+
     geom_line(aes_string(y=input$tat))+
     geom_point(aes_string(y=input$tat))+
     scale_color_manual(values = custom_colors, drop =F) + 
