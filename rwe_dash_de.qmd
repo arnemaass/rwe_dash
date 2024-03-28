@@ -34,6 +34,7 @@ library(ggplot2)
 library(viridis)
 library(hrbrthemes)
 library(sf)
+library(plotly)
 library(leaflet) # for faster map-plotting then plotly
 library(htmltools)
 library(rsconnect)
@@ -87,14 +88,12 @@ mainPanel(
   h5("Die Daten wurden aus den Verfassungsschutzberichten 2000 bis 2021 entnommen.
   Nicht zu jeder Kategorie und zu jedem Jahr liegen Daten vor, aus diesem Grund können die Graphen
   teilweise lückenhaft sein. Bitte beachten Sie auch die Veränderung der Y-Achsenskalierung."),
-  plotOutput("plot_pmk", hover=hoverOpts("plot_hover", delay = 50, delayType = "throttle")),
-  textOutput('hover_info'))
+  plotlyOutput("plot_pmk"))
 ```
 
 ## {.sidebar}
 
 ```{r}
-
 selectInput("bl", label = "Hier können Sie ein Bundesland auswählen:",
             choices = c("Deutschland","Baden-Württemberg","Bayern", "Berlin",
                         "Brandenburg", "Bremen", "Hamburg", "Hessen", "Mecklenburg-Vorpommern",
@@ -121,32 +120,33 @@ checkboxGroupInput("art", label = "Politische Gesinnung und Art der Straftat:",
 
 ```{r}
 #| context: server
-output$plot_pmk <- renderPlot({
+output$plot_pmk <- renderPlotly({
 
-    #plot with data
-  ggplot(subset(pmk_zs, variable %in% input$art), aes(x=jahr, color=variable)) +
-    geom_path(aes_string(y= paste0("`",input$bl,"`")))+
-    geom_point(aes_string(y= paste0("`",input$bl,"`")))+
+p <- ggplot(subset(pmk_zs, variable %in% input$art), 
+            aes(x = jahr, y = get(input$bl), color = variable, group = variable))+
+  geom_path() +
+  geom_point(aes(text=paste("Jahr: ", jahr, "<br>",
+                            "Art: ", variable, "<br>",
+                            "Zahl: ", get(input$bl)))) +
+    scale_color_manual(values = c("Straftaten-rechts" = "gray0",
+                                  "Straftaten-links" = "firebrick",
+                                  "Straftaten-islamistisch" = "forestgreen",
+                                  "Straftaten-ausländisch" = "blue4",
+                                  "Gewalttaten-rechts" = "gold",
+                                  "Gewalttaten-links" = "plum1",
+                                  "Gewalttaten-islamistisch" = "#fffac8",
+                                  "Gewalttaten-ausländisch" = "cornflowerblue")) +
     xlim(input$time[1], input$time[2]) +
-      scale_color_manual(
-        values =  c("Straftaten-rechts"="gray0",
-                    "Straftaten-links"="firebrick",
-                    "Straftaten-islamistisch"="forestgreen",
-                    "Straftaten-ausländisch"="blue4",
-                    "Gewalttaten-rechts"="gold",
-                    "Gewalttaten-links"="plum1",
-                    "Gewalttaten-islamistisch"="#fffac8",
-                    "Gewalttaten-ausländisch"="cornflowerblue"))+
-    xlab("Jahr")+
-    ylab("Anzahl der Taten")+
-    guides(color=guide_legend(title="Art der Straftat:"))+
+    xlab("Jahr") +
+    ylab("Anzahl der Taten") +
+    guides(color = guide_legend(title = "Art der Straftat:")) +
     theme_ipsum_rc()
-    # theme_minimal()
-  })
 
-output$hover_info <- renderText({
-    print(paste("Anzahl pro Jahr:", as.integer(input$plot_hover$y )))
-  })
+  ggplotly(p, tooltip = "text") %>%
+  layout(dragmode = "select")
+})
+
+
 
 
 ```
@@ -158,8 +158,7 @@ mainPanel(
   h3("Rechtsextreme Straftaten 2002 -2022"),
   h5("Hier sehen Sie die monatliche Anzahl rechtsextremistischer Straftaten im Zeitraum von 2002 bis Ende 2022.
      Datengrundlage sind die 'kleinen Anfragen' an den Bundestag durch die Fraktion DIE LINKE."),
-  plotOutput("plot_rs", hover=hoverOpts("plot_hover", delay = 50, delayType = "throttle")),
-  textOutput('hover_info2'))
+  plotlyOutput("plot_rs"))
 ```
 
 ## {.sidebar}
@@ -206,7 +205,7 @@ checkboxGroupInput("BL", label = "Wählen Sie ein Bundesland",
 ```{r}
 #| context: server
 
-output$plot_rs <- renderPlot({
+output$plot_rs <- renderPlotly({
   
   custom_colors <- c(
   "Baden-Wuerttemberg" = "deeppink", "Bavaria" = "forestgreen",
@@ -220,24 +219,22 @@ output$plot_rs <- renderPlot({
 )
 
   
-  ggplot(subset(rs, state %in% input$BL), aes(x=date, color= state))+
-    geom_line(aes_string(y=input$tat))+
-    geom_point(aes_string(y=input$tat))+
-    scale_color_manual(values = custom_colors, drop =F) + 
-    xlim(input$time2[1], input$time2[2])+
-    xlab("Jahr")+
-    ylab("Anzahl der Straftaten")+
-    guides(color=guide_legend(title="Bundesland:"))+
-    theme_ipsum_rc()
-    # theme_minimal()
+    r <- ggplot(subset(rs, state %in% input$BL), aes(x = date, y = get(input$tat), color = state)) +
+      geom_line() +
+      geom_point(aes(text = paste("Bundesland: ", state, "<br>",
+                                  "Anzahl der Straftaten: ", get(input$tat), "<br>",
+                                  "Datum: ", date))) +
+      scale_color_manual(values = custom_colors, drop = F) + 
+      xlim(input$time2[1], input$time2[2]) +
+      xlab("Jahr") +
+      ylab("Anzahl der Straftaten") +
+      guides(color = guide_legend(title = "Bundesland:")) +
+      theme_ipsum_rc()
+      
+    ggplotly(r, tooltip = "text") %>% 
+      layout(dragmode = "select")
 
-
-  })
-
-output$hover_info2 <- renderText({
-    print(paste("Anzahl:", as.integer(input$plot_hover$y )))
-  })
-
+})
 ```
 
 # Rechte Demos
