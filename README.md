@@ -1,4 +1,4 @@
-# Right Wing Extremism Dashboard
+# Right-Wing Extremism Dashboard
 
 ![banner](screenshots/dashboard1.png)
 
