@@ -65,7 +65,7 @@ mainPanel(
   h5("Eylem Kanol | Arne Maaß | Johanna Knoesel", style = "text-align: center;"),
   tags$br(),
   h5(HTML(
-  "Dieses Dashboard visualisiert drei selbsterstellte Datensätze zu rechtem Extremismus in Deutschland.<br>
+  "Dieses Dashboard stellt drei selbsterstellte Datensätze zu rechtem Extremismus in Deutschland vor.<br>
   Oben können Sie zwischen den Visualisierungen wechseln und die Daten nach Ihren Wünschen filtern. <br>  <br>
   Politisch motivierte Kriminalität zeigt die jährliche Entwicklung verschiedener ideologisch motivierter Straftaten auf Grundlage von Verfassungsschutzberichten.<br>
   Die zweite Visualisierung ist eine monatliche Zeitreihe für rechtsextremistische Straftaten nach Bundesländern. <br>
@@ -74,7 +74,7 @@ mainPanel(
   tags$br(),
 tags$a(href = "https://www.wzb.eu",
        img(src = "www/wzb-wide-text.png", 
-           style = "display: block; margin-left: auto; margin-right: auto; max-width: 100%; height: auto;"),
+           style = "display: block; margin-left: auto; margin-right: auto; max-width: 20%; height: auto;"),
        style = "position: absolute; bottom: 10px; width: 90%; text-align: center;")
 )
 
@@ -171,7 +171,7 @@ selectInput("tat", label= "Wählen Sie die Art der Straftat",
                         "Straftaten"= "other"),
             selected = "Insgesamt")
 
-sliderInput("time2", "Hier können Sie den zeitlichen Ramen festlegen:",
+sliderInput("time2", "Hier können Sie den zeitlichen Rahmen festlegen:",
             min(rs$date, na.rm = T), max(rs$date, na.rm = T),
             value = c(min(rs$date, na.rm = T), max(rs$date, na.rm = T)), 
             timeFormat = "%F")

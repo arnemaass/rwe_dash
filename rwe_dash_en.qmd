@@ -25,7 +25,6 @@ server: shiny
 # shared
 # setwd("Z:/Shared/Shiny/2024/quarto_dash")
 
-
 library(tidyverse)
 library(quarto)
 library(arrow) # PARQUET FOR FASTER LOADING
@@ -36,6 +35,7 @@ library(sf)
 library(plotly)
 library(leaflet) # for faster map-plotting then plotly
 library(htmltools)
+# remotes::install_version("rsconnect", "0.8.29")
 library(rsconnect)
 library(shiny)
 
@@ -75,7 +75,7 @@ mainPanel(
   h5("Eylem Kanol | Arne Maaß | Johanna Knoesel", style = "text-align: center;"),
   tags$br(),
   h5(HTML(
-  "This dashboard visualizes three self-created data sets on right-wing extremism in Germany.<br>
+  "This dashboard introduces three self-created data sets on right-wing extremism in Germany.<br>
   At the top, you can switch between the visualizations and filter the data according to your preferences. <br>  <br>
  Politically Motivated Crime shows the annual development of various ideologically motivated crimes based on reports from the German Domestic
 Intelligence Service.<br>
@@ -85,7 +85,7 @@ Intelligence Service.<br>
   tags$br(),
 tags$a(href = "https://www.wzb.eu",
        img(src = "www/wzb-wide-text.png", 
-           style = "display: block; margin-left: auto; margin-right: auto; max-width: 100%; height: auto;"),
+           style = "display: block; margin-left: auto; margin-right: auto; max-width: 20%; height: auto;"),
        style = "position: absolute; bottom: 10px; width: 90%; text-align: center;")
 )
 
@@ -96,7 +96,7 @@ tags$a(href = "https://www.wzb.eu",
 ```{r}
 mainPanel(
   h3("Politically Motivated Crime 2000-2021"),
-  h5("The data was taken from the 2000 to 2021 Reports on the Protection of the Constitution.
+  h5("The data was taken from the 2000 to 2021 Reports on the Protection of the Constitution and showcases different political motives for criminal offenses.
   Data is not available for every category and every year, which is why the graphs may be
   be partially incomplete. Please also note the change in the Y-axis scaling."),
   plotlyOutput("plot_pmk"))
@@ -184,7 +184,7 @@ output$plot_pmk <- renderPlotly({
 mainPanel(
   h3("Right-Wing Extremist Crime 2002-2022"),
   h5("Here you can see the monthly number of right-wing extremist crimes in the period from 2002 to the end of 2022.
-    The data is based on brief parliamentary request (kleine Anfragen) submitted to the Government by the opposition left-wing party DIE LINKE"),
+    The data is based on small parliamentary enquiries (kleine Anfragen) submitted to the Government by the opposition left-wing party DIE LINKE."),
   plotlyOutput("plot_rs"))
 ```
 
@@ -270,7 +270,7 @@ output$plot_rs <- renderPlotly({
 
 ```
 
-# Right Wing Demonstrations
+# Right-Wing Demonstrations
 
 ```{r}
 
@@ -278,7 +278,7 @@ mainPanel(
   leafletOutput("interactivePlot"),
   h3("Right-Wing Extremist Demonstrations by district 2005-2022"),
   h5(HTML("Here you can see the number of right-wing extremist demonstrations and the number of participants by district from 2005 to the end of 2022. 
-  Data scource are answers to brief parliamentary request (kleine Anfragen) submitted to the Government by the opposition left-wing party DIE LINKE. <br> 
+  The Data is based on answers to small parliamentary enquiries (kleine Anfragen) submitted to the Government by the opposition left-wing party DIE LINKE. <br> 
   <a href='https://data.gesis.org/sharing/#!Detail/10.7802/2256' target='_blank'> Source: Kanol, E.; Knoesel, J. (2021): Right-Wing Extremist Mobilization in Germany. Version 1.0.0. WZB Berlin Social Science Center. Dataset.</a>"))
 )
 
