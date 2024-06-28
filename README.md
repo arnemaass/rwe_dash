@@ -1,5 +1,4 @@
 # Right-Wing Extremism Dashboard
-
 https://germanextremismplotly.shinyapps.io/rwe_dash_en/#start
 
 ![banner](screenshots/dashboard1.png)
