@@ -10,6 +10,3 @@ https://germanextremismplotly.shinyapps.io/rwe_dash_en/#start
 
 ![banner](screenshots/dashboard4.png)
 
-
-more to follow ...
-
